@@ -1,99 +1,208 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import './styles.css';
+import React from "react";
+import { createRoot } from "react-dom/client";
+import data from "./data.json";
+import "./styles.css";
 
-const resume = {
-  name: 'Shahab Ahmed',
-  title: 'Software Engineer',
-  phone: '+92 315 1586289',
-  email: 'shahabahmed3339@gmail.com',
-  linkedin: 'linkedin.com/in/its-shahab-ahmed',
-  linkedinUrl: 'https://linkedin.com/in/its-shahab-ahmed',
-  github: 'github.com/shahabahmed3339',
-  githubUrl: 'https://github.com/shahabahmed3339',
-  location: 'Lahore, Pakistan',
-  summary:
-    'Software Engineer with 5+ years of experience specializing in Angular and full-stack development using the MEAN/MERN stack. Experienced in healthcare systems, ERP platforms, and compliance applications, delivering scalable, maintainable, and user-focused solutions. Strong in Angular, React, Node.js, Python (Flask & Django), databases, modular architecture, API integration, and production support.',
-  experience: [
-    { role: 'Senior Software Engineer', company: 'Binary Tech', context: 'DocNow EHR · Healthcare Software Support & Maintenance', dates: 'Mar 2024 – Feb 2026', location: 'Lahore, Pakistan', bullets: ['Developed a medical software system using the MEAN stack.', 'Standardized modules to improve efficiency and readability.', 'Completed sprint tasks within assigned timelines and provided real-time customer issue support.'] },
-    { role: 'Associate Software Engineer', company: 'Logic Powered Solutions', context: 'Software & IT Solutions', dates: 'Dec 2021 – Mar 2024', location: 'Islamabad, Pakistan', bullets: ['Built and maintained scalable systems using the MEAN stack.', 'Developed a multi-module ERP covering HR, Accounts, Finance, Ledgers, and related workflows.', 'Developed Power BI solutions, troubleshot defects, and supported production environments.'] },
-    { role: 'Junior Full Stack Developer', company: 'Quality Compliance 360', context: 'ISO Quality Compliance', dates: 'Feb 2021 – Dec 2021', location: 'Islamabad, Pakistan', bullets: ['Developed a MERN web application for ISO-compliant risk assessments.', 'Developed a scalable HR management and recruitment system.', 'Built a real-time attendance system in Django using machine learning.'] }
-  ],
-  education: [
-    { degree: 'Master of Science in Computer Science', school: 'HITEC University', dates: 'Sep 2020 – Jan 2023', location: 'Taxila, Pakistan', cgpa: '3.80 / 4.00', thesis: 'Human Action Recognition: A Fused Framework of Pre-trained DarkNet-19 and SqueezeNet Deep Models' },
-    { degree: 'Bachelor of Science in Computer Engineering', school: 'HITEC University', dates: 'Sep 2016 – Jul 2020', location: 'Taxila, Pakistan', cgpa: '3.62 / 4.00', thesis: 'Implementation of Correlation Filters on DSP Processor for Real-time Applications' }
-  ],
-  projects: [
-    ['Flash Deal API', 'Python, Django, React.js', 'Production-ready stock reservation system designed to prevent overselling during high-concurrency flash sales.'],
-    ['Simula React SDK', 'JavaScript, React.js', 'Production-ready Native Ad SDK for React / Next.js applications.'],
-    ['Simula Flutter SDK', 'Dart, Flutter', 'Production-ready Native Ad SDK for Flutter applications.'],
-    ['Risk Management', 'React, Express, MongoDB', 'React frontend with Express/MongoDB backend for lightweight risk management.'],
-    ['KBL RMS', 'React, Express, MongoDB', 'Lightweight Risk Management System with React client and Express/MongoDB server.'],
-    ['AMS — Automated Monitoring System', 'Python, Deep Learning, Django', 'Face detection and recognition system using Python, deep learning models, and Django.']
-  ],
-  skills: [
-    ['Frontend', 'Angular, React.js, Next.js, Nest.js, TypeScript, JavaScript, HTML, CSS, Tailwind CSS, Bootstrap CSS'],
-    ['Backend', 'Node.js, Python, Flask, Django'],
-    ['Data', 'MongoDB, PostgreSQL, MySQL'],
-    ['Tools', 'Git, Power BI'],
-    ['Stacks', 'MEAN, MERN']
-  ],
-  strengths: 'Teamwork, Problem Solving, Customer Support, Critical Thinking',
-  languages: 'English — Professional · Urdu — Native · Punjabi — Native'
+const RESERVED = new Set(["backgroundVideo", "resume"]);
+
+const LABELS = {
+  head: null,
+  about: "Professional Summary",
+  technologies: "Technologies",
+  experience: "Professional Experience",
+  education: "Education",
+  projects: "Selected Projects",
+  skills: "Skills & Expertise",
+  interests: "Interests",
+  languages: "Languages",
 };
 
-const External = ({ href, children }) => <a href={href} target="_blank" rel="noreferrer">{children}</a>;
+const ORDER = [
+  "about", "experience", "education", "projects",
+  "technologies", "skills", "languages", "interests"
+];
+
+const has = (v) =>
+  v !== undefined && v !== null &&
+  !(typeof v === "string" && !v.trim()) &&
+  !(Array.isArray(v) && v.length === 0);
+
+const labelize = (key) =>
+  key.replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, c => c.toUpperCase());
+
+const dateRange = (item) => {
+  const start = item?.start ?? item?.from ?? item?.startDate;
+  const end = item?.end ?? item?.to ?? item?.endDate ?? item?.current;
+  if (!start && !end) return "";
+  return `${start || ""}${start && end ? " – " : ""}${end || ""}`;
+};
 
 function Section({ title, children }) {
+  if (!has(children)) return null;
   return <section className="section"><h2>{title}</h2>{children}</section>;
 }
 
-function Entry({ item }) {
-  return <article className="entry">
-    <div className="entry-head">
-      <div><div className="entry-title">{item.role}</div><div className="entry-company">{item.company}{item.context ? <> · {item.context}</> : null}</div></div>
-      <div className="entry-meta"><strong>{item.dates}</strong><em>{item.location}</em></div>
-    </div>
-    <ul>{item.bullets.map((b, i) => <li key={i}>{b}</li>)}</ul>
-  </article>;
+function Header({ head = {} }) {
+  const links = Array.isArray(head.links) ? head.links.filter(x => has(x?.url)) : [];
+  return (
+    <header className="header">
+      {has(head.name) && <h1>{head.name}</h1>}
+      {has(head.title) && <div className="headline">{head.title}</div>}
+      <div className="contact">
+        {has(head.phone) && <a href={`tel:${head.phone}`}>{head.phone}</a>}
+        {has(head.email) && <a href={`mailto:${head.email}`}>{head.email}</a>}
+        {links.map((x, i) =>
+          <a key={i} href={x.url} target="_blank" rel="noreferrer">{x.title || x.url}</a>
+        )}
+      </div>
+    </header>
+  );
 }
 
-function Education({ item }) {
-  return <article className="education-entry">
-    <div className="entry-head">
-      <div><div className="entry-title">{item.degree}</div><div className="entry-company">{item.school}</div></div>
-      <div className="entry-meta"><strong>{item.dates}</strong><em>{item.location}</em></div>
+function Summary({ value }) {
+  const values = Array.isArray(value) ? value : [value];
+  return <Section title="Professional Summary">
+    <div className="summary">{values.filter(has).map((x, i) => <p key={i}>{x}</p>)}</div>
+  </Section>;
+}
+
+function Experience({ value, title }) {
+  return <Section title={title}>
+    {value.filter(x => x && typeof x === "object").map((job, i) =>
+      <article className="entry" key={i}>
+        <div className="entryTop">
+          <div>
+            {has(job.title) && <strong>{job.title}</strong>}
+            {has(job.company) && <em>{job.company}</em>}
+            {has(job.description) && <span className="muted">{job.description}</span>}
+          </div>
+          <div className="meta">
+            {has(dateRange(job)) && <span>{dateRange(job)}</span>}
+            {has(job.location) && <em>{job.location}</em>}
+          </div>
+        </div>
+        {Array.isArray(job.accomplishments) && job.accomplishments.length > 0 &&
+          <ul>{job.accomplishments.filter(has).map((x, j) => <li key={j}>{x}</li>)}</ul>}
+      </article>
+    )}
+  </Section>;
+}
+
+function Education({ value, title }) {
+  return <Section title={title}>
+    {value.filter(Boolean).map((edu, i) =>
+      <article className="entry" key={i}>
+        <div className="entryTop">
+          <div>
+            {has(edu.title) && <strong>{edu.title}</strong>}
+            {has(edu.institute) && <em>{edu.institute}</em>}
+          </div>
+          <div className="meta">
+            {has(dateRange(edu)) && <span>{dateRange(edu)}</span>}
+            {has(edu.location) && <em>{edu.location}</em>}
+          </div>
+        </div>
+        {has(edu.cgpa) && <div><b>CGPA:</b> {edu.cgpa}</div>}
+        {has(edu.thesis) && <div><b>Thesis:</b> {edu.thesis}</div>}
+      </article>
+    )}
+  </Section>;
+}
+
+function Projects({ value, title }) {
+  return <Section title={title}>
+    {value.filter(Boolean).map((p, i) =>
+      <article className="project" key={i}>
+        <div className="projectTop">
+          <strong>{p.title || `Project ${i + 1}`}</strong>
+          {has(p.github) && <a href={p.github} target="_blank" rel="noreferrer">GitHub</a>}
+        </div>
+        {has(p.description) && <div>{p.description}</div>}
+        {Array.isArray(p.techList) && p.techList.length > 0 &&
+          <div className="tech">{p.techList.filter(has).join(" · ")}</div>}
+      </article>
+    )}
+  </Section>;
+}
+
+function ArraySection({ title, value }) {
+  if (!Array.isArray(value) || value.length === 0) return null;
+
+  const objects = value.every(x => x && typeof x === "object" && !Array.isArray(x));
+  if (!objects) {
+    return <Section title={title}><div className="inline">{value.filter(has).join(" · ")}</div></Section>;
+  }
+
+  return <Section title={title}>
+    <div className="genericGrid">
+      {value.map((item, i) => <GenericObject key={i} value={item} />)}
     </div>
-    <div className="detail"><b>CGPA:</b> {item.cgpa}</div>
-    <div className="detail"><b>Thesis:</b> {item.thesis}</div>
-  </article>;
+  </Section>;
+}
+
+function GenericObject({ value }) {
+  const entries = Object.entries(value).filter(([k, v]) =>
+    !["image", "icon"].includes(k) && has(v)
+  );
+  return <div className="genericObject">
+    {entries.map(([k, v]) => (
+      <div className="genericField" key={k}>
+        <b>{labelize(k)}:</b> <Value value={v} />
+      </div>
+    ))}
+  </div>;
+}
+
+function Value({ value }) {
+  if (Array.isArray(value)) {
+    return <>{value.filter(has).map((x, i) =>
+      <React.Fragment key={i}>{i ? ", " : ""}<Value value={x} /></React.Fragment>
+    )}</>;
+  }
+  if (value && typeof value === "object") return <GenericObject value={value} />;
+  if (typeof value === "string" && /^https?:\/\//.test(value)) {
+    return <a href={value} target="_blank" rel="noreferrer">{value}</a>;
+  }
+  return <>{String(value)}</>;
+}
+
+function GenericSection({ title, value }) {
+  if (!has(value)) return null;
+  if (Array.isArray(value)) return <ArraySection title={title} value={value} />;
+  if (typeof value === "object") return (
+    <Section title={title}><GenericObject value={value} /></Section>
+  );
+  return <Section title={title}><div>{String(value)}</div></Section>;
+}
+
+function RenderSection({ keyName, value }) {
+  const title = LABELS[keyName] || labelize(keyName);
+  if (!has(value) || RESERVED.has(keyName) || keyName === "head") return null;
+
+  if (keyName === "about") return <Summary value={value} />;
+  if (keyName === "experience" && Array.isArray(value)) return <Experience value={value} title={title} />;
+  if (keyName === "education" && Array.isArray(value)) return <Education value={value} title={title} />;
+  if (keyName === "projects" && Array.isArray(value)) return <Projects value={value} title={title} />;
+  return <GenericSection title={title} value={value} />;
 }
 
 function App() {
-  return <main className="page">
-    <header className="header">
-      <h1>{resume.name.toUpperCase()}</h1>
-      <div className="title">{resume.title}</div>
-      <div className="contact-row">
-        <span>{resume.phone}</span><span>·</span>
-        <External href={`mailto:${resume.email}`}>{resume.email}</External><span>·</span>
-        <External href={resume.linkedinUrl}>{resume.linkedin}</External><span>·</span>
-        <External href={resume.githubUrl}>{resume.github}</External>
-      </div>
-    </header>
+  const keys = Object.keys(data)
+    .filter(k => !RESERVED.has(k) && k !== "head" && has(data[k]))
+    .sort((a, b) => {
+      const ai = ORDER.indexOf(a), bi = ORDER.indexOf(b);
+      if (ai === -1 && bi === -1) return 0;
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+      return ai - bi;
+    });
 
-    <Section title="PROFESSIONAL SUMMARY"><p className="summary">{resume.summary}</p></Section>
-
-    <Section title="PROFESSIONAL EXPERIENCE">{resume.experience.map((x, i) => <Entry key={i} item={x} />)}</Section>
-
-    <Section title="EDUCATION">{resume.education.map((x, i) => <Education key={i} item={x} />)}</Section>
-
-    <Section title="PROJECTS"><div className="projects">{resume.projects.map(([name, stack, desc], i) => <article className="project" key={i}><div><b>{name}</b> <span>— {stack}</span></div><p>{desc}</p></article>)}</div></Section>
-
-    <Section title="SKILLS & EXPERTISE"><div className="skill-list">{resume.skills.map(([label, value]) => <div className="skill-row" key={label}><b>{label}:</b><span>{value}</span></div>)}</div></Section>
-
-    <Section title="STRENGTHS & LANGUAGES"><div className="final-row"><p><b>Strengths:</b> {resume.strengths}</p><p><b>Languages:</b> {resume.languages}</p></div></Section>
+  return <main className="resume">
+    <Header head={data.head || {}} />
+    {keys.map(key => <RenderSection key={key} keyName={key} value={data[key]} />)}
   </main>;
 }
 
-createRoot(document.getElementById('root')).render(<App />);
+createRoot(document.getElementById("root")).render(<App />);
