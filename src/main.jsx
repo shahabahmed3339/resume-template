@@ -64,7 +64,7 @@ function Header({ head = {} }) {
 function Summary({ value }) {
   const values = Array.isArray(value) ? value : [value];
   return <Section title="Professional Summary">
-    <div className="summary">{values.filter(has).map((x, i) => <p key={i}>{x}</p>)}</div>
+    <div className="summary"><p>{values.filter(has).join(" ")}</p></div>
   </Section>;
 }
 
