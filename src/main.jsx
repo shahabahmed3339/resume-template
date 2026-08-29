@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import data from "./data.json";
 import "./styles.css";
+import { exportResumePdf } from "./lib/exportResumePdf";
 
 const EXCLUDED_SECTIONS = new Set(["backgroundVideo", "resume", "head"]);
 const SECTION_LABELS = {
@@ -45,13 +46,13 @@ function Header({ head = {} }) {
 }
 
 function ExportPdfButton() {
-  const [isExporting, setIsExporting] = useState(false);
+  const [exportType, setExportType] = useState("");
 
   const exportPdf = async () => {
     const resumeElement = document.querySelector(".resume");
     if (!resumeElement) return;
 
-    setIsExporting(true);
+    setExportType("visual");
     document.body.classList.add("pdf-exporting");
     try {
       const { default: html2pdf } = await import("html2pdf.js");
@@ -70,13 +71,25 @@ function ExportPdfButton() {
         .save();
     } finally {
       document.body.classList.remove("pdf-exporting");
-      setIsExporting(false);
+      setExportType("");
+    }
+  };
+
+  const exportAtsPdf = async () => {
+    setExportType("ats");
+    try {
+      await exportResumePdf(data);
+    } finally {
+      setExportType("");
     }
   };
 
   return <div className="export-actions">
-    <button className="export-button" type="button" disabled={isExporting} onClick={exportPdf}>
-      {isExporting ? "Preparing PDF..." : "Export as PDF"}
+    <button className="export-button" type="button" disabled={Boolean(exportType)} onClick={exportPdf}>
+      {exportType === "visual" ? "Preparing PDF..." : "Export Visual PDF"}
+    </button>
+    <button className="export-button export-button-secondary" type="button" disabled={Boolean(exportType)} onClick={exportAtsPdf}>
+      {exportType === "ats" ? "Preparing PDF..." : "Export ATS Text PDF"}
     </button>
   </div>;
 }
@@ -106,7 +119,8 @@ function Education({ entries }) {
   return <Section title={SECTION_LABELS.education}>{entries.filter(Boolean).map((education, index) => <article className="entry" key={`${education.institute}-${education.title}-${index}`}>
     <EntryHeading entry={education} organization={education.institute} />
     {(isPresent(education.cgpa) || isPresent(education.thesis)) && <p className="education-details">
-      {isPresent(education.cgpa) && <>CGPA: {education.cgpa}</>}{isPresent(education.cgpa) && isPresent(education.thesis) && " | "}{isPresent(education.thesis) && <>Thesis: {education.thesis}</>}
+      {isPresent(education.cgpa) && <span>CGPA: {education.cgpa}</span>}
+      {isPresent(education.thesis) && <span>Thesis: {education.thesis}</span>}
     </p>}
   </article>)}</Section>;
 }
