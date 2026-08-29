@@ -19,7 +19,7 @@ const LABELS = {
 
 const ORDER = [
   "about", "experience", "education", "projects",
-  "technologies", "skills", "languages", "interests"
+  "technologies", "skills", "interests", "languages"
 ];
 
 const has = (v) =>
