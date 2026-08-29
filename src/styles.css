@@ -1,234 +1,113 @@
-@page {
-  size: A4;
-  margin: 0;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#root {
-  margin: 0;
-  min-height: 100%;
-}
+* { box-sizing: border-box; }
+html, body, #root { min-height: 100%; margin: 0; }
 
 body {
-  background: #ececec;
+  background: #f2f2f2;
   color: #111;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 10.2pt;
-  line-height: 1.24;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 10pt;
+  line-height: 1.35;
 }
 
-a {
-  color: #1557a6;
-  text-decoration: underline;
+a { color: #111; text-decoration: none; }
+a:hover, a:focus-visible { text-decoration: underline; }
+
+.resume-shell {
+  width: 210mm;
+  margin: 10px auto;
+  position: relative;
 }
 
 .resume {
-  width: 210mm;
   min-height: 297mm;
-  margin: 10px auto;
-  padding: 10mm 12mm 8mm;
+  padding: 12mm;
   background: #fff;
-  box-shadow: 0 0 0 1px #ddd, 0 2px 12px rgba(0, 0, 0, .08);
+  box-shadow: 0 0 0 1px #ddd, 0 2px 12px rgb(0 0 0 / 8%);
 }
 
-.header {
-  text-align: center;
-  margin-bottom: 8px;
-}
-
-.header h1 {
+/* The exporter supplies the A4 margins; this makes them repeat on every page. */
+.pdf-exporting .resume-shell {
+  width: 186mm;
   margin: 0;
-  font-size: 25pt;
-  line-height: 1;
-  font-weight: 700;
 }
 
-.headline {
-  margin-top: 3px;
-  font-style: italic;
-  font-size: 10.5pt;
+.pdf-exporting .resume {
+  min-height: 273mm;
+  padding: 0;
+  box-shadow: none;
 }
+
+.export-actions { position: absolute; top: 0; left: calc(100% + 12px); }
+.export-button {
+  padding: 6px 10px;
+  border: 1px solid #111;
+  border-radius: 2px;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  font-size: 9pt;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.export-button:hover, .export-button:focus-visible { background: #333; }
+.header { margin-bottom: 10px; text-align: center; }
+.header h1 { margin: 0; font-size: 24pt; line-height: 1.1; letter-spacing: .02em; }
+.headline { margin: 3px 0 0; font-size: 11pt; font-weight: 600; }
 
 .contact {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   flex-wrap: wrap;
+  gap: 2px 0;
+  margin-top: 5px;
   font-size: 9.3pt;
-  margin-top: 4px;
-}
-
-.sub-contact {
-  display: flex;
-  flex-direction: row;
-  gap: 2px;
-}
-
-/* .contact a:not(:last-child)::after {
-  content: "  |  ";
-  color: #111;
-  text-decoration: none;
-} */
-
-.section {
-  margin-top: 8px;
-  break-inside: avoid;
-}
-
-.section h2 {
-  margin: 0 0 5px;
-  padding-bottom: 2px;
-  border-bottom: 1.3px solid #111;
-  font-size: 12.2pt;
-  line-height: 1.05;
-  text-transform: uppercase;
-}
-
-.summary p {
-  margin: 0 0 2px;
-}
-
-.entry,
-.project {
-  margin-bottom: 7px;
-  break-inside: avoid;
-}
-
-.entryTop {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-}
-
-.entryTop strong,
-.projectTop strong {
-  display: block;
-  font-size: 10.5pt;
-}
-
-.entryTop em {
-  display: block;
-}
-
-.muted {
-  display: block;
-  color: #333;
-  font-size: 9.2pt;
   font-style: normal;
 }
 
-.meta {
-  min-width: 145px;
-  text-align: right;
+.contact span:not(:last-child)::after { content: " | "; margin: 0 6px; }
+.section { margin-top: 11px; break-inside: avoid; }
+.section h2 {
+  margin: 0 0 5px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #111;
+  font-size: 11.5pt;
+  line-height: 1.15;
+  letter-spacing: .04em;
+  text-transform: uppercase;
 }
 
-.meta span,
-.meta em {
-  display: block;
+p { margin: 0; }
+.entry { margin: 0 0 8px; break-inside: avoid; }
+.entry:last-child { margin-bottom: 0; }
+.entry-heading { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }
+.entry h3 { margin: 0; font-size: 10.3pt; line-height: 1.25; }
+.organization { font-weight: 600; }
+.entry-meta { flex: 0 0 auto; color: #222; font-size: 9.3pt; text-align: right; }
+.entry-description, .education-details, .project > p { margin-top: 1px; }
+
+ul { margin: 3px 0 0; padding-left: 18px; }
+li { margin: 1px 0; }
+.project-link { flex: 0 1 auto; font-size: 8.6pt; overflow-wrap: anywhere; text-align: right; }
+.keywords { margin: 0; font-size: 9.6pt; }
+.project .keywords { margin-top: 2px; }
+.detail-list { display: grid; grid-template-columns: max-content 1fr; gap: 2px 8px; margin: 0; }
+.detail-list dt { font-weight: 700; }
+.detail-list dd { margin: 0; }
+
+@media screen and (max-width: 800px) {
+  .resume-shell { width: 100%; margin: 0; }
+  .resume { min-height: 0; padding: 24px; box-shadow: none; }
+  .export-actions { position: static; display: flex; justify-content: flex-end; padding: 12px 24px 0; }
 }
 
-.entry ul {
-  margin: 2px 0 0 18px;
-  padding: 0;
-}
-
-.entry li {
-  margin: 1px 0;
-}
-
-.projectTop {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.projectTop a {
-  font-size: 8.8pt;
-  white-space: nowrap;
-}
-
-.tech {
-  color: #333;
-  font-size: 9.1pt;
-  font-style: italic;
-  margin-top: 1px;
-}
-
-.inline {
-  font-size: 9.5pt;
-}
-
-.genericGrid {
-  display: grid;
-  gap: 4px;
-}
-
-.genericObject {
-  break-inside: avoid;
-}
-
-.genericField {
-  margin: 1px 0;
-  font-size: 9.4pt;
-}
-
-@media print {
-  body {
-    background: #fff;
-  }
-
-  .resume {
-    margin: 0;
-    box-shadow: none;
-  }
-}
-
-@media screen and (max-width:800px) {
-  body {
-    background: #fff;
-  }
-
-  .resume {
-    width: 100%;
-    min-height: 0;
-    margin: 0;
-    padding: 24px;
-    box-shadow: none;
-  }
-
-  .entryTop {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-
-  .meta {
-    min-width: 0;
-    text-align: left;
-  }
-}
-
-@media screen and (max-width:500px) {
-  .resume {
-    padding: 18px;
-  }
-
-  .header h1 {
-    font-size: 21pt;
-  }
-
-  .contact {
-    display: block;
-  }
-
-  /* .contact a:not(:last-child)::after {
-    content: "  |  ";
-  } */
-}
-
-.mt-1 {
-  margin-top: 1px;
+@media screen and (max-width: 560px) {
+  .resume { padding: 18px; }
+  .export-actions { padding: 12px 18px 0; }
+  .header h1 { font-size: 21pt; }
+  .entry-heading { display: block; }
+  .entry-meta, .project-link { text-align: left; }
+  .contact { display: block; }
+  .contact span { display: block; }
+  .contact span:not(:last-child)::after { content: none; }
 }
