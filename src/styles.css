@@ -56,17 +56,23 @@ a {
 
 .contact {
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
   flex-wrap: wrap;
   font-size: 9.3pt;
   margin-top: 4px;
 }
 
-.contact a:not(:last-child)::after {
+.sub-contact {
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+}
+
+/* .contact a:not(:last-child)::after {
   content: "  |  ";
   color: #111;
   text-decoration: none;
-}
+} */
 
 .section {
   margin-top: 8px;
@@ -218,7 +224,11 @@ a {
     display: block;
   }
 
-  .contact a:not(:last-child)::after {
+  /* .contact a:not(:last-child)::after {
     content: "  |  ";
-  }
+  } */
+}
+
+.mt-1 {
+  margin-top: 1px;
 }
